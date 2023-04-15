@@ -1,11 +1,54 @@
 import streamlit as st
 from streamlit_javascript import st_javascript
+import boto3
+import json
 
+st.set_page_config(page_title="AI-Generated Drum Pattern Evaluation")
 
 # TODO get URL params (not sure if useful)
 # params = st.experimental_get_query_params()
 # if "test" in params:
 #    st.write(params["test"][0])
+
+# Apply CSS to remove Streamlit menu and advertising
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
+        """
+hide_header_style = """
+        <style>
+        header {visibility: hidden;}
+        </style>
+        """
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+content_width_style = """
+            <style>
+            .block-container {max-width: 1000px !important;}
+            </style>
+            """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
+st.markdown(hide_header_style, unsafe_allow_html=True)
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+st.markdown(content_width_style, unsafe_allow_html=True)
+
+# Reduce padding at the top of the page
+st.markdown("""
+        <style>
+               .block-container {
+                    margin-top: -5rem;
+                    padding-top: 0rem;
+                    padding-bottom: 0rem;
+                    padding-left: 5rem;
+                    padding-right: 5rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
 
 
 def client_ip():
@@ -21,7 +64,7 @@ def client_ip():
             return result['ip']
 
     except:
-        # TODO unable to get IP address
+        # TODO unable to get IP address - what do?
         pass
 
 
@@ -67,7 +110,7 @@ st.header('Evaluation')
 # music qualities...
 # Submit!
 
-# TODO load available genres from resources folder!
+# TODO load available genres from resources folder
 # - onchange listener on genre select -> reload audio!
 # - load random audio from selected genre: AI or training
 # - show audio player
@@ -89,11 +132,8 @@ st.write("IP: ", ip_address)
 
 # ---
 
-import boto3
-import json
-
-ACCESS_KEY = 'REMOVED'
-SECRET_KEY = 'REMOVED'
+ACCESS_KEY = 'REDACTED'
+SECRET_KEY = 'REDACTED'
 aws_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 
 data_dict = {
@@ -112,21 +152,3 @@ aws_client.put_object(
     Key='dev/test.json',
     Body=data_string
 )
-
-"""
-def upload_to_aws(local_file, bucket, s3_file):
-
-    try:
-        s3.upload_file(local_file, bucket, s3_file)
-        print("Upload Successful")
-        return True
-    except FileNotFoundError:
-        print("The file was not found")
-        return False
-    except NoCredentialsError:
-        print("Credentials not available")
-        return False
-
-
-uploaded = upload_to_aws('local_file', 'bucket_name', 's3_file_name')
-"""
