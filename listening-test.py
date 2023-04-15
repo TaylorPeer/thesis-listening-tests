@@ -25,6 +25,7 @@ hide_streamlit_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
+            .viewerBadge_container__1QSob {visibility: hidden;}
             </style>
             """
 content_width_style = """
