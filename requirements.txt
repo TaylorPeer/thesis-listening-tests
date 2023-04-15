@@ -1,0 +1,4 @@
+streamlit==1.21.0
+streamlit-javascript==0.1.5
+boto3==1.26.114
+
