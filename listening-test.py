@@ -25,7 +25,7 @@ hide_streamlit_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
-            a div[class^='viewerBadge_link'] {visibility: hidden;}
+            div[class^='viewerBadge_link'] {visibility: hidden;}
             </style>
             """
 content_width_style = """
