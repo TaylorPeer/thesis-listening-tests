@@ -74,7 +74,7 @@ ip_address = client_ip()
 
 # Remove "hosted by Streamlit" badge
 st_javascript('console.log("running!")')
-st_javascript('if ($("[class^=viewerBadge]", parent.document) != null) {console.log("found!")} else {console.log("not found!")}')
+#st_javascript('if ($("[class^=viewerBadge]", parent.document) != null) {console.log("found!")} else {console.log("not found!")}')
 
 st.title('AI-Generated Drum Pattern Evaluation Trying again')
 
