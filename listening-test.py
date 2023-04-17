@@ -143,7 +143,7 @@ st.header('Evaluation')
 
 audio_files = list(populate_audio())
 genres = tuple(set([audio_file.split("/")[1] for audio_file in audio_files] + ["Any Genre"]))
-selected_genre = st.radio("Select a Genre of Drum Patterns to Evaluate", genres, index=len(genres) - 1, on_change=select_audio)
+selected_genre = st.radio("Select a genre of drum patterns to evaluate", genres, index=len(genres) - 1, on_change=select_audio)
 select_audio()
 path_components = st.session_state.selected_audio_path.split("/")
 source = path_components[2]
