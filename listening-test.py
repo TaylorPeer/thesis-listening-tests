@@ -126,7 +126,7 @@ set_page_styles()
 show_intro_text()
 user_info = get_basic_user_info()
 if "ip_address" not in user_info:
-    user_info["ip_address"] = ip
+    user_info["ip_address"] = ip if ip is not None else "no IP"
 
 st.header('Evaluation')
 
@@ -188,20 +188,22 @@ def reset(for_question=None):
         correct_on2 = True
 
     if for_question is None:
+
         if st.session_state.submit_button_text == "Submit":
             if not unsure:
                 st.session_state.ratings = st.session_state.ratings + 1
+                if correct_on1 or correct_on2:
+                    st.session_state.feedback = "Correct! "
+                    st.session_state.correct = st.session_state.correct + 1
+                elif not unsure:
+                    st.session_state.feedback = "Incorrect! "
+
             if st.session_state.ratings > 0:
                 percentage = round((st.session_state.correct / st.session_state.ratings) * 100)
                 score_message = "You correctly identified {} out of {} ({}%) human-vs-AI generated drum patterns.  \n Press *Next* to evaluate another.".format(
                     st.session_state.correct, st.session_state.ratings, percentage)
             else:
                 score_message = "Press *Next* to evaluate another."
-            if correct_on1 or correct_on2:
-                st.session_state.feedback = "Correct! "
-                st.session_state.correct = st.session_state.correct + 1
-            elif not unsure:
-                st.session_state.feedback = "Incorrect! "
 
             if not unsure:
                 if source == "training":
@@ -313,15 +315,15 @@ def submit():
     data_dict["timestamp"] = current_time_ms
     data_dict["num_ratings"] = st.session_state.ratings
     data_dict["num_correct"] = st.session_state.correct
-    try:
-        aws_client.put_object(
-            Bucket='listening-test-results',
-            # TODO bucket as environment variable
-            Key="dev/{}-{}.json".format(user_info["ip_address"].replace(".", "_"), current_time_ms),
-            Body=json.dumps(data_dict, indent=2, default=str)
-        )
-    except:
-        st.session_state.score = "Failed to store evaluation results!"
+    #try:
+    aws_client.put_object(
+        Bucket='listening-test-results',
+        # TODO bucket as environment variable
+        Key="dev/{}-{}.json".format(user_info["ip_address"].replace(".", "_"), current_time_ms),
+        Body=json.dumps(data_dict, indent=2, default=str)
+    )
+    #except:
+    #st.session_state.score = "Failed to store evaluation results!"
 
 
 data_dict = {
