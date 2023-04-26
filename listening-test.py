@@ -38,8 +38,6 @@ def set_page_styles():
                         margin-top: -5rem;
                         padding-top: 2rem;
                         padding-bottom: 0rem;
-                        padding-left: 5rem;
-                        padding-right: 5rem;
                     }
             </style>
             """, unsafe_allow_html=True)
