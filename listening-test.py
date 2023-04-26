@@ -124,9 +124,9 @@ aws_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_
 ip = get_client_ip()
 set_page_styles()
 show_intro_text()
-user_info = get_basic_user_info()
-if "ip_address" not in user_info:
-    user_info["ip_address"] = ip if ip is not None else "no IP"
+st.session_state.user_info = get_basic_user_info()
+if "ip_address" not in st.session_state.user_info:
+    st.session_state.user_info["ip_address"] = ip if ip is not None else round(time.time() * 1000)
 
 st.header('Evaluation')
 
@@ -165,6 +165,7 @@ def q_change(question_index, pos_index):
 
 
 def reset(for_question=None):
+
     # Check if something was selected
     nothing_selected = True
     for question_index in [1, 2, 3, 4, 5]:
@@ -189,42 +190,45 @@ def reset(for_question=None):
 
     if for_question is None:
 
-        if st.session_state.submit_button_text == "Submit":
-            if not unsure:
-                st.session_state.ratings = st.session_state.ratings + 1
-                if correct_on1 or correct_on2:
-                    st.session_state.feedback = "Correct! "
-                    st.session_state.correct = st.session_state.correct + 1
-                elif not unsure:
-                    st.session_state.feedback = "Incorrect! "
+        with placeholder:
+            with st.spinner("Submitting rating, hold on for a second..."):
 
-            if st.session_state.ratings > 0:
-                percentage = round((st.session_state.correct / st.session_state.ratings) * 100)
-                score_message = "You correctly identified {} out of {} ({}%) human-vs-AI generated drum patterns.  \n Press *Next* to evaluate another.".format(
-                    st.session_state.correct, st.session_state.ratings, percentage)
-            else:
-                score_message = "Press *Next* to evaluate another."
+                if st.session_state.submit_button_text == "Submit":
+                    if not unsure:
+                        st.session_state.ratings = st.session_state.ratings + 1
+                        if correct_on1 or correct_on2:
+                            st.session_state.feedback = "Correct! "
+                            st.session_state.correct = st.session_state.correct + 1
+                        elif not unsure:
+                            st.session_state.feedback = "Incorrect! "
 
-            if not unsure:
-                if source == "training":
-                    st.session_state.feedback += "This drum \npattern was \nhuman-composed"
-                elif source == "generated":
-                    st.session_state.feedback += "This drum \npattern was \nAI-generated"
-            else:
-                if source == "training":
-                    st.session_state.feedback += "This drum pattern was \nhuman-composed"
-                elif source == "generated":
-                    st.session_state.feedback += "This drum pattern was \nAI-generated"
-            st.session_state.score = score_message
-            st.session_state.submit_button_text = "Next"
-            st.session_state.input_disabled = True
-            submit()
-        else:
-            st.session_state.feedback = ""
-            st.session_state.score = ""
-            st.session_state.submit_button_text = "Submit"
-            st.session_state.input_disabled = False
-            st.session_state.selected_audio_path = None
+                    if st.session_state.ratings > 0:
+                        percentage = round((st.session_state.correct / st.session_state.ratings) * 100)
+                        score_message = "You correctly identified {} out of {} ({}%) human-vs-AI generated drum patterns.  \n Press *Next* to evaluate another.".format(
+                            st.session_state.correct, st.session_state.ratings, percentage)
+                    else:
+                        score_message = "Press *Next* to evaluate another."
+
+                    if not unsure:
+                        if source == "training":
+                            st.session_state.feedback += "This drum \npattern was \nhuman-composed"
+                        elif source == "generated":
+                            st.session_state.feedback += "This drum \npattern was \nAI-generated"
+                    else:
+                        if source == "training":
+                            st.session_state.feedback += "This drum pattern was \nhuman-composed"
+                        elif source == "generated":
+                            st.session_state.feedback += "This drum pattern was \nAI-generated"
+                    st.session_state.score = score_message
+                    st.session_state.submit_button_text = "Next"
+                    st.session_state.input_disabled = True
+                    submit()
+                else:
+                    st.session_state.feedback = ""
+                    st.session_state.score = ""
+                    st.session_state.submit_button_text = "Submit"
+                    st.session_state.input_disabled = False
+                    st.session_state.selected_audio_path = None
 
     # Reset all checkboxes
     for question_index in [1, 2, 3, 4, 5]:
@@ -297,6 +301,7 @@ st.text("\n")
 
 st.write(st.session_state.score)
 st.button(st.session_state.submit_button_text, on_click=reset)
+placeholder = st.empty()
 
 
 def get_question_response(question_index):
@@ -315,25 +320,26 @@ def submit():
     data_dict["timestamp"] = current_time_ms
     data_dict["num_ratings"] = st.session_state.ratings
     data_dict["num_correct"] = st.session_state.correct
-    #try:
-    aws_client.put_object(
-        Bucket='listening-test-results',
-        # TODO bucket as environment variable
-        Key="dev/{}-{}.json".format(user_info["ip_address"].replace(".", "_"), current_time_ms),
-        Body=json.dumps(data_dict, indent=2, default=str)
-    )
-    #except:
-    #st.session_state.score = "Failed to store evaluation results!"
+
+    try:
+        aws_client.put_object(
+            Bucket='listening-test-results',
+            # TODO bucket as environment variable
+            Key="dev/{}-{}.json".format(st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
+            Body=json.dumps(data_dict, indent=2, default=str)
+        )
+    except:
+        st.session_state.score = "Failed to store evaluation results!"
 
 
 data_dict = {
     "filename": st.session_state.selected_audio_path,
     "reviewer": {
-        "age": user_info["age"],
-        "gender": user_info["gender"],
-        "background": user_info["background"],
-        "email": user_info["email"],
-        "ip": user_info["ip_address"]
+        "age": st.session_state.user_info["age"],
+        "gender": st.session_state.user_info["gender"],
+        "background": st.session_state.user_info["background"],
+        "email": st.session_state.user_info["email"],
+        "ip": st.session_state.user_info["ip_address"]
     },
     "ratings": {
         "human-or-ai": get_question_response(1),
