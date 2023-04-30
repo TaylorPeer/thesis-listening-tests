@@ -318,10 +318,12 @@ def submit():
     data_dict["num_correct"] = st.session_state.correct
 
     #try:
+    ip = st.session_state.user_info[
+        "ip_address"] if "user_info" in st.session_state and "ip_address" in st.session_state.user_info else "no IP"
     aws_client.put_object(
         Bucket='listening-test-results',
         # TODO bucket as environment variable
-        Key="dev/{}-{}.json".format(st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
+        Key="dev/{}-{}.json".format(ip.replace(".", "_"), current_time_ms),
         Body=json.dumps(data_dict, indent=2, default=str)
     )
     #except:
