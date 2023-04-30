@@ -317,15 +317,15 @@ def submit():
     data_dict["num_ratings"] = st.session_state.ratings
     data_dict["num_correct"] = st.session_state.correct
 
-    try:
-        aws_client.put_object(
-            Bucket='listening-test-results',
-            # TODO bucket as environment variable
-            Key="dev/{}-{}.json".format(st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
-            Body=json.dumps(data_dict, indent=2, default=str)
-        )
-    except:
-        st.session_state.score = "Failed to store evaluation results!"
+    #try:
+    aws_client.put_object(
+        Bucket='listening-test-results',
+        # TODO bucket as environment variable
+        Key="dev/{}-{}.json".format(st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
+        Body=json.dumps(data_dict, indent=2, default=str)
+    )
+    #except:
+    #st.session_state.score = "Failed to store evaluation results!"
 
 
 data_dict = {
