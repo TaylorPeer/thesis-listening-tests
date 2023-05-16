@@ -116,7 +116,7 @@ def select_audio():
 
 ACCESS_KEY = os.environ['AWS_ACCESS_KEY']
 SECRET_KEY = os.environ['AWS_SECRET_KEY']
-BUCKET = os.environ['BUCKET'] if 'BUCKET' in os.environ else 'dev'
+AWS_FOLDER = os.environ['AWS_FOLDER'] if 'AWS_FOLDER' in os.environ else 'dev'
 aws_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 
 ip = get_client_ip()
@@ -346,8 +346,7 @@ def submit():
     try:
         aws_client.put_object(
             Bucket='listening-test-results',
-            # TODO bucket as environment variable
-            Key="dev/{}-{}.json".format(st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
+            Key="{}/{}-{}.json".format(AWS_FOLDER, st.session_state.user_info["ip_address"].replace(".", "_"), current_time_ms),
             Body=json.dumps(data_dict, indent=2, default=str)
         )
     except:
